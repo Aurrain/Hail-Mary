@@ -1,78 +1,102 @@
-// This file contains defines allowing targeting byond versions newer than the supported
+/* To use the ref tracking debugging tool in game
+1. Enable/uncomment the following before using debug tools on your local machine:
 
-//Update this whenever you need to take advantage of more recent byond features
-#define MIN_COMPILER_VERSION 514
-#define MIN_COMPILER_BUILD 1584
-#if (DM_VERSION < MIN_COMPILER_VERSION || DM_BUILD < MIN_COMPILER_BUILD) && !defined(SPACEMAN_DMM) && !defined(OPENDREAM)
-//Don't forget to update this part
-#error Your version of BYOND is too out-of-date to compile this project. Go to https://secure.byond.com/download/build/514 and update.
-#error You need version 514.1584 or higher
-#endif
+**TESTING
+**REFERENCE_TRACKING
+**REFERENCE_TRACKING_DEBUG
+**GC_FAILURE_HARD_LOOKUP
 
+2. Set return statement of the object you wish to ref track to
+   QDEL_HINT_FINDREFERENCE or QDEL_HINT_IFFAIL_FINDREFERENCE
 
-/*#if (DM_VERSION == 515 && DM_BUILD >= 1624)
-#warn Your version of BYOND is currently not supported by debugger.
-#warn Please consider downgrading to 515.1623 or lower, or wait for auxtools to support latest BYOND builds.
-#endif*/
-
-
-/*
-// Keep savefile compatibilty at minimum supported level
-#if DM_VERSION >= 515
-/savefile/byond_version = MIN_COMPILER_VERSION
-#endif
+3. Start game up on your local machine and delete the object in question.
+   Look at the daemon log for results.
 */
 
-// 515 split call for external libraries into call_ext
-#if DM_VERSION < 515
-#define LIBCALL call
-#else
-#define LIBCALL call_ext
+//#define TESTING
+// By using the testing("message") proc you can create debug-feedback for people
+// with this uncommented, but not visible in the release version
+
+// Comment this out if you are debugging problems that might be obscured
+// by custom error handling in world/Error
+#ifdef DEBUG
+#define USE_CUSTOM_ERROR_HANDLER
 #endif
 
-// So we want to have compile time guarantees these methods exist on local type, unfortunately 515 killed the .proc/procname and .verb/verbname syntax so we have to use nameof()
-// For the record: GLOBAL_VERB_REF would be useless as verbs can't be global.
+#ifdef TESTING
 
-#if DM_VERSION < 515
+/// Used to find the sources of harddels
+//#define REFERENCE_TRACKING
+#ifdef REFERENCE_TRACKING
 
-/// Call by name proc references, checks if the proc exists on either this type or as a global proc.
-#define PROC_REF(X) (.proc/##X)
-/// Call by name verb references, checks if the verb exists on either this type or as a global verb.
-#define VERB_REF(X) (.verb/##X)
+/// Used for doing dry runs of the reference finder
+//#define REFERENCE_TRACKING_DEBUG
 
-/// Call by name proc reference, checks if the proc exists on either the given type or as a global proc
-#define TYPE_PROC_REF(TYPE, X) (##TYPE.proc/##X)
-/// Call by name verb reference, checks if the verb exists on either the given type or as a global verb
-#define TYPE_VERB_REF(TYPE, X) (##TYPE.verb/##X)
+/// Run a lookup on things hard deleting by default
+//#define GC_FAILURE_HARD_LOOKUP
+#ifdef GC_FAILURE_HARD_LOOKUP
+/// Don't stop when searching, go till you're totally done
+#define FIND_REF_NO_CHECK_TICK
+#endif // GC_FAILURE_HARD_LOOKUP
 
-/// Call by name proc reference, checks if the proc is an existing global proc
-#define GLOBAL_PROC_REF(X) (/proc/##X)
+#endif // REFERENCE_TRACKING
 
-#else
+//#define VISUALIZE_ACTIVE_TURFS
 
-/// Call by name proc references, checks if the proc exists on either this type or as a global proc.
-#define PROC_REF(X) (nameof(.proc/##X))
-/// Call by name verb references, checks if the verb exists on either this type or as a global verb.
-#define VERB_REF(X) (nameof(.verb/##X))
+#endif // TESTING
 
-/// Call by name proc reference, checks if the proc exists on either the given type or as a global proc
-#define TYPE_PROC_REF(TYPE, X) (nameof(##TYPE.proc/##X))
-/// Call by name verb reference, checks if the verb exists on either the given type or as a global verb
-#define TYPE_VERB_REF(TYPE, X) (nameof(##TYPE.verb/##X))
+//#define UNIT_TESTS
 
-/// Call by name proc reference, checks if the proc is an existing global proc
-#define GLOBAL_PROC_REF(X) (/proc/##X)
-
+#ifndef PRELOAD_RSC
+#define PRELOAD_RSC 2
+// 0 = allow external/on-demand
+// 1 = default
+// 2 = preload everything
 #endif
 
-#if (DM_VERSION == 515)
-/// fcopy will crash on 515 linux if given a non-existant file, instead of returning 0 like on 514 linux or 515 windows
-/// var case matches documentation for fcopy.
-/world/proc/__fcopy(Src, Dst)
-	if (istext(Src) && !fexists(Src))
-		return 0
-	return fcopy(Src, Dst)
+#ifdef LOWMEMORYMODE
+#define FORCE_MAP "_maps/runtimestation.json"
+#endif
 
-#define fcopy(Src, Dst) world.__fcopy(Src, Dst)
+// Minimum supported compiler
+#define MIN_COMPILER_VERSION 513
+#define MIN_COMPILER_BUILD 1514
 
+#if (DM_VERSION < MIN_COMPILER_VERSION || DM_BUILD < MIN_COMPILER_BUILD) \
+    && !defined(SPACEMAN_DMM) && !defined(OPENDREAM)
+#error Your version of BYOND is too out-of-date to compile this project.
+#error You need version 513.1514 or higher.
+#endif
+
+#ifdef TESTING
+#warn compiling in TESTING mode. testing() debug messages will be visible.
+#endif
+#ifdef GC_FAILURE_HARD_LOOKUP
+//#define FIND_REF_NO_CHECK_TICK
+#endif
+
+#ifdef CIBUILDING
+#define UNIT_TESTS
+#endif
+
+#ifdef CITESTING
+#define TESTING
+#endif
+
+#ifdef TGS
+// TGS performs its own build of dm.exe
+#define CBT
+#endif
+
+#ifdef CBT
+#define ALL_MAPS
+#endif
+
+// Maximum overlays per atom
+#define MAX_ATOM_OVERLAYS 100
+
+#if !defined(CBT) && !defined(SPACEMAN_DMM)
+#warn Building with Dream Maker is no longer supported and will result in errors.
+#warn In order to build, run BUILD.bat in the root directory.
+#warn Consider switching to VSCode editor instead (Ctrl+Shift+B).
 #endif
