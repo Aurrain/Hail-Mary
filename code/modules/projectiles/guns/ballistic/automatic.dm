@@ -1637,7 +1637,7 @@
 
 /obj/item/gun/ballistic/automatic/m1garand/sks
 	name = "SKS"
-	desc = "Old hunting rifle taken from disovered stockpiles and refurbished in Phoenix workshops. The standard heavy rifle of the Legion, still rare. .308, semi-auto only, internal magazine."
+	desc = "An old hunting rifle taken from disovered stockpiles and refurbished in Phoenix workshops. The standard heavy rifle of the Legion, still rare. .308, semi-auto only, internal magazine."
 	icon = 'icons/obj/guns/projectile.dmi'
 	lefthand_file = 'icons/fallout/onmob/weapons/guns_lefthand.dmi'
 	righthand_file = 'icons/fallout/onmob/weapons/guns_righthand.dmi'
@@ -1672,7 +1672,7 @@
 
 /obj/item/gun/ballistic/automatic/marksman/sniper
 	name = "sniper rifle"
-	desc = "A DKS 501, chambered in .308 Springfield.  With a light polymer body, it's suited for long treks through the desert."
+	desc = "A DKS 501, chambered in 30-06.  With a light polymer body, it's suited for long treks through the desert."
 	icon_prefix = "sniperrifle"
 	icon_state = "sniper_rifle"
 	item_state = "sniper_rifle"
